@@ -1,14 +1,17 @@
-import { useState } from 'react'
-import { LogIn } from 'lucide-react'
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { LogIn } from 'lucide-react';
 
 export default function AdminLogin() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    // UI only - langsung login tanpa validasi
-  }
+    e.preventDefault();
+    // UI only - langsung ke dashboard tanpa validasi
+    navigate('/admin/dashboard');
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 flex items-center justify-center p-4">
@@ -61,5 +64,5 @@ export default function AdminLogin() {
         </div>
       </div>
     </div>
-  )
+  );
 }

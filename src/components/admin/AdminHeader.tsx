@@ -1,6 +1,10 @@
-import { Bell, User, LogOut } from 'lucide-react'
+import { Bell, User, LogOut } from 'lucide-react';
 
-export default function AdminHeader() {
+interface AdminHeaderProps {
+  onLogout: () => void;
+}
+
+export default function AdminHeader({ onLogout }: AdminHeaderProps) {
   return (
     <header className="bg-white border-b border-gray-200 px-8 py-4">
       <div className="flex items-center justify-between">
@@ -24,17 +28,15 @@ export default function AdminHeader() {
               <User size={20} className="text-white" />
             </div>
             <button
+              onClick={onLogout}
               className="p-2 hover:bg-red-50 rounded-lg transition-colors group"
               title="Logout"
             >
-              <LogOut
-                size={20}
-                className="text-gray-600 group-hover:text-red-600"
-              />
+              <LogOut size={20} className="text-gray-600 group-hover:text-red-600" />
             </button>
           </div>
         </div>
       </div>
     </header>
-  )
+  );
 }

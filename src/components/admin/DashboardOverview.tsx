@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react'
-import {
-  ShoppingBag,
-  Image,
-  Star,
-  TrendingUp,
+import { useState } from 'react';
+import { 
+  ShoppingBag, 
+  Image, 
+  Star, 
+  TrendingUp, 
   Users,
   Package,
   MapPin,
@@ -12,138 +12,83 @@ import {
   Check,
   Wand2,
   Calendar,
-  BarChart3,
-} from 'lucide-react'
-import { projectId, publicAnonKey } from '../../utils/supabase/info'
-
-interface AnalyticsData {
-  totalVisitors: number
-  todayVisitors: number
-  topLocations: Array<{ city: string; count: number }>
-  dailyVisits: Array<{ date: string; count: number }>
-}
-
-interface StoreLocation {
-  id: string
-  city: string
-  store_name: string
-  store_type: string
-  is_active: boolean
-}
+  BarChart3
+} from 'lucide-react';
 
 export default function DashboardOverview() {
-  const [stats, setStats] = useState({
-    products: 0,
-    gallery: 0,
-    testimonials: 0,
-    visitors: 0,
-    topProduct: '',
-    topLocation: '',
-  })
+  // Dummy data
+  const stats = {
+    products: 8,
+    gallery: 24,
+    testimonials: 15,
+    visitors: 342,
+    topProduct: 'Keripik Lumpia Original',
+    topLocation: 'Jakarta'
+  };
 
-  const [analytics, setAnalytics] = useState<AnalyticsData>({
-    totalVisitors: 0,
-    todayVisitors: 0,
-    topLocations: [],
-    dailyVisits: [],
-  })
+  const analytics = {
+    totalVisitors: 1247,
+    todayVisitors: 342,
+    topLocations: [
+      { city: 'Jakarta', count: 450 },
+      { city: 'Bandung', count: 320 },
+      { city: 'Surabaya', count: 215 },
+      { city: 'Semarang', count: 142 },
+      { city: 'Yogyakarta', count: 120 }
+    ],
+    dailyVisits: [
+      { date: '2024-01-20', count: 180 },
+      { date: '2024-01-21', count: 165 },
+      { date: '2024-01-22', count: 195 },
+      { date: '2024-01-23', count: 210 },
+      { date: '2024-01-24', count: 185 },
+      { date: '2024-01-25', count: 220 },
+      { date: '2024-01-26', count: 342 }
+    ]
+  };
 
-  const [storeLocations, setStoreLocations] = useState<StoreLocation[]>([])
+  const storeLocations = [
+    { id: '1', city: 'Jakarta Selatan', store_name: 'Toko Berkah', store_type: 'retail', is_active: true },
+    { id: '2', city: 'Jakarta Pusat', store_name: 'Minimarket Sejahtera', store_type: 'retail', is_active: true },
+    { id: '3', city: 'Bandung', store_name: 'Reseller Maju', store_type: 'reseller', is_active: true },
+    { id: '4', city: 'Bandung', store_name: 'Toko Sumber Rezeki', store_type: 'retail', is_active: true },
+    { id: '5', city: 'Surabaya', store_name: 'Reseller Jaya', store_type: 'reseller', is_active: true },
+    { id: '6', city: 'Semarang', store_name: 'Toko Makmur', store_type: 'retail', is_active: false },
+    { id: '7', city: 'Yogyakarta', store_name: 'Reseller Sukses', store_type: 'reseller', is_active: true },
+    { id: '8', city: 'Jakarta Barat', store_name: 'Minimarket Indah', store_type: 'retail', is_active: true }
+  ];
 
   // Caption Generator State
   const [captionForm, setCaptionForm] = useState({
     productName: '',
     flavor: '',
     tone: 'friendly',
-    includeEmoji: true,
-  })
-  const [generatedCaption, setGeneratedCaption] = useState('')
-  const [copiedCaption, setCopiedCaption] = useState(false)
-
-  useEffect(() => {
-    fetchStats()
-    fetchAnalytics()
-    fetchStoreLocations()
-  }, [])
-
-  const fetchStats = async () => {
-    try {
-      const response = await fetch(
-        `https://${projectId}.supabase.co/functions/v1/make-server-513f45b4/dashboard-stats`,
-        {
-          headers: {
-            Authorization: `Bearer ${publicAnonKey}`,
-          },
-        }
-      )
-      if (response.ok) {
-        const data = await response.json()
-        setStats(data)
-      }
-    } catch (error) {
-      console.error('Error fetching dashboard stats:', error)
-    }
-  }
-
-  const fetchAnalytics = async () => {
-    try {
-      const response = await fetch(
-        `https://${projectId}.supabase.co/functions/v1/make-server-513f45b4/analytics`,
-        {
-          headers: {
-            Authorization: `Bearer ${publicAnonKey}`,
-          },
-        }
-      )
-      if (response.ok) {
-        const data = await response.json()
-        setAnalytics(data)
-      }
-    } catch (error) {
-      console.error('Error fetching analytics:', error)
-    }
-  }
-
-  const fetchStoreLocations = async () => {
-    try {
-      const response = await fetch(
-        `https://${projectId}.supabase.co/functions/v1/make-server-513f45b4/store-locations`,
-        {
-          headers: {
-            Authorization: `Bearer ${publicAnonKey}`,
-          },
-        }
-      )
-      if (response.ok) {
-        const data = await response.json()
-        setStoreLocations(data)
-      }
-    } catch (error) {
-      console.error('Error fetching store locations:', error)
-    }
-  }
+    includeEmoji: true
+  });
+  const [generatedCaption, setGeneratedCaption] = useState('');
+  const [copiedCaption, setCopiedCaption] = useState(false);
 
   const generateCaption = () => {
-    const { productName, flavor, tone, includeEmoji } = captionForm
-    const emoji = includeEmoji ? '🥟✨' : ''
-
-    let caption = ''
+    const { productName, flavor, tone, includeEmoji } = captionForm;
+    const emoji = includeEmoji ? '🥟✨' : '';
+    
+    let caption = '';
     if (tone === 'friendly') {
-      caption = `${emoji} Siapa yang suka cemilan renyah?\n\nKenalan yuk sama ${productName} varian ${flavor}! Keripik lumpia yang bikin nagih, cocok banget buat temen nonton atau ngemil sore. Kriuk di luar, gurih di dalam! 😋\n\n📦 Order sekarang, stok terbatas!\n💬 DM untuk info lebih lanjut\n\n#mealjun #keripiklumpia #camilansehat #snacktime`
+      caption = `${emoji} Siapa yang suka cemilan renyah?\n\nKenalan yuk sama ${productName} varian ${flavor}! Keripik lumpia yang bikin nagih, cocok banget buat temen nonton atau ngemil sore. Kriuk di luar, gurih di dalam! 😋\n\n📦 Order sekarang, stok terbatas!\n💬 DM untuk info lebih lanjut\n\n#mealjun #keripiklumpia #camilansehat #snacktime`;
     } else if (tone === 'professional') {
-      caption = `${emoji} ${productName} - ${flavor}\n\nDibuat dengan bahan pilihan berkualitas tinggi, tanpa pengawet, dan higienis. Setiap gigitan memberikan sensasi renyah yang sempurna.\n\n✅ BPOM & Halal\n✅ Produksi Fresh\n✅ Kemasan Praktis\n\nPesan sekarang dan rasakan kenikmatannya!\n\n#mealjun #keripiklumpia #produkindonesia`
+      caption = `${emoji} ${productName} - ${flavor}\n\nDibuat dengan bahan pilihan berkualitas tinggi, tanpa pengawet, dan higienis. Setiap gigitan memberikan sensasi renyah yang sempurna.\n\n✅ BPOM & Halal\n✅ Produksi Fresh\n✅ Kemasan Praktis\n\nPesan sekarang dan rasakan kenikmatannya!\n\n#mealjun #keripiklumpia #produkindonesia`;
     } else {
-      caption = `🔥 KRIUUUK!\n\nItu suara ${productName} ${flavor} yang lagi nunggu kamu cobain! Enak, murah, dan bikin ketagihan. Udah coba belum?\n\nYang belum, rugi banget deh! 💯\nYang udah, pasti mau lagi kan? 😎\n\nYuk order sekarang!\n\n#mealjun #keripiklumpia #snacktime`
+      caption = `🔥 KRIUUUK!\n\nItu suara ${productName} ${flavor} yang lagi nunggu kamu cobain! Enak, murah, dan bikin ketagihan. Udah coba belum?\n\nYang belum, rugi banget deh! 💯\nYang udah, pasti mau lagi kan? 😎\n\nYuk order sekarang!\n\n#mealjun #keripiklumpia #snacktime`;
     }
-
-    setGeneratedCaption(caption)
-  }
+    
+    setGeneratedCaption(caption);
+  };
 
   const copyCaption = () => {
-    navigator.clipboard.writeText(generatedCaption)
-    setCopiedCaption(true)
-    setTimeout(() => setCopiedCaption(false), 2000)
-  }
+    navigator.clipboard.writeText(generatedCaption);
+    setCopiedCaption(true);
+    setTimeout(() => setCopiedCaption(false), 2000);
+  };
 
   const statCards = [
     {
@@ -151,64 +96,51 @@ export default function DashboardOverview() {
       label: 'Total Produk',
       value: stats.products,
       color: 'bg-orange-500',
-      bgColor: 'bg-orange-50',
+      bgColor: 'bg-orange-50'
     },
     {
       icon: Image,
       label: 'Foto Galeri',
       value: stats.gallery,
       color: 'bg-blue-500',
-      bgColor: 'bg-blue-50',
+      bgColor: 'bg-blue-50'
     },
     {
       icon: Star,
       label: 'Testimoni',
       value: stats.testimonials,
       color: 'bg-yellow-500',
-      bgColor: 'bg-yellow-50',
+      bgColor: 'bg-yellow-50'
     },
     {
       icon: Users,
       label: 'Pengunjung Hari Ini',
       value: stats.visitors,
       color: 'bg-green-500',
-      bgColor: 'bg-green-50',
-    },
-  ]
+      bgColor: 'bg-green-50'
+    }
+  ];
 
   // Group store locations by city
-  const locationsByCity = storeLocations.reduce(
-    (acc: Record<string, number>, loc) => {
-      acc[loc.city] = (acc[loc.city] || 0) + 1
-      return acc
-    },
-    {}
-  )
+  const locationsByCity = storeLocations.reduce((acc: Record<string, number>, loc) => {
+    acc[loc.city] = (acc[loc.city] || 0) + 1;
+    return acc;
+  }, {});
 
   return (
     <div className="space-y-8">
       <div>
         <h1 className="text-3xl text-gray-900">Dashboard Overview</h1>
-        <p className="text-gray-600 mt-2">
-          Ringkasan aktivitas dan statistik website Mealjun
-        </p>
+        <p className="text-gray-600 mt-2">Ringkasan aktivitas dan statistik website Mealjun</p>
       </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {statCards.map((stat, index) => (
-          <div
-            key={index}
-            className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100"
-          >
+          <div key={index} className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
             <div className="flex items-center justify-between mb-4">
-              <div
-                className={`${stat.bgColor} w-12 h-12 rounded-xl flex items-center justify-center`}
-              >
-                <stat.icon
-                  className={`${stat.color.replace('bg-', 'text-')}`}
-                  size={24}
-                />
+              <div className={`${stat.bgColor} w-12 h-12 rounded-xl flex items-center justify-center`}>
+                <stat.icon className={`${stat.color.replace('bg-', 'text-')}`} size={24} />
               </div>
               <TrendingUp size={20} className="text-green-500" />
             </div>
@@ -227,12 +159,8 @@ export default function DashboardOverview() {
             </div>
             <h3 className="text-lg text-gray-900">Produk Terpopuler</h3>
           </div>
-          <div className="text-2xl text-orange-600 mb-2">
-            {stats.topProduct || 'Belum ada data'}
-          </div>
-          <p className="text-sm text-gray-600">
-            Paling banyak diklik minggu ini
-          </p>
+          <div className="text-2xl text-orange-600 mb-2">{stats.topProduct}</div>
+          <p className="text-sm text-gray-600">Paling banyak diklik minggu ini</p>
         </div>
 
         <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
@@ -242,12 +170,8 @@ export default function DashboardOverview() {
             </div>
             <h3 className="text-lg text-gray-900">Lokasi Pengunjung Teratas</h3>
           </div>
-          <div className="text-2xl text-blue-600 mb-2">
-            {stats.topLocation || 'Belum ada data'}
-          </div>
-          <p className="text-sm text-gray-600">
-            Kota dengan pengunjung terbanyak
-          </p>
+          <div className="text-2xl text-blue-600 mb-2">{stats.topLocation}</div>
+          <p className="text-sm text-gray-600">Kota dengan pengunjung terbanyak</p>
         </div>
       </div>
 
@@ -260,9 +184,7 @@ export default function DashboardOverview() {
             </div>
             <div>
               <h2 className="text-2xl text-gray-900">Insight Konsumen Lokal</h2>
-              <p className="text-sm text-gray-600">
-                Analisis pengunjung berdasarkan lokasi geografis
-              </p>
+              <p className="text-sm text-gray-600">Analisis pengunjung berdasarkan lokasi geografis</p>
             </div>
           </div>
         </div>
@@ -273,9 +195,7 @@ export default function DashboardOverview() {
               <Users className="text-blue-600" size={32} />
               <TrendingUp size={20} className="text-green-500" />
             </div>
-            <div className="text-3xl text-gray-900 mb-1">
-              {analytics.totalVisitors}
-            </div>
+            <div className="text-3xl text-gray-900 mb-1">{analytics.totalVisitors}</div>
             <div className="text-sm text-gray-700">Total Pengunjung</div>
           </div>
 
@@ -284,9 +204,7 @@ export default function DashboardOverview() {
               <Calendar className="text-green-600" size={32} />
               <TrendingUp size={20} className="text-green-500" />
             </div>
-            <div className="text-3xl text-gray-900 mb-1">
-              {analytics.todayVisitors}
-            </div>
+            <div className="text-3xl text-gray-900 mb-1">{analytics.todayVisitors}</div>
             <div className="text-sm text-gray-700">Pengunjung Hari Ini</div>
           </div>
 
@@ -294,9 +212,7 @@ export default function DashboardOverview() {
             <div className="flex items-center justify-between mb-3">
               <MapPin className="text-orange-600" size={32} />
             </div>
-            <div className="text-3xl text-gray-900 mb-1">
-              {analytics.topLocations.length}
-            </div>
+            <div className="text-3xl text-gray-900 mb-1">{analytics.topLocations.length}</div>
             <div className="text-sm text-gray-700">Lokasi Unik</div>
           </div>
         </div>
@@ -304,61 +220,44 @@ export default function DashboardOverview() {
         <div className="grid lg:grid-cols-2 gap-6">
           {/* Top Locations */}
           <div>
-            <h3 className="text-lg text-gray-900 mb-4">
-              🗺️ Top 5 Lokasi Pengunjung
-            </h3>
+            <h3 className="text-lg text-gray-900 mb-4">🗺️ Top 5 Lokasi Pengunjung</h3>
             <div className="space-y-3">
               {analytics.topLocations.slice(0, 5).map((location, index) => (
-                <div
-                  key={index}
-                  className="flex items-center space-x-3 bg-gray-50 rounded-lg p-3"
-                >
+                <div key={index} className="flex items-center space-x-3 bg-gray-50 rounded-lg p-3">
                   <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center text-sm text-orange-600">
                     {index + 1}
                   </div>
                   <div className="flex-1">
                     <div className="text-gray-900">{location.city}</div>
-                    <div className="text-sm text-gray-500">
-                      {location.count} pengunjung
-                    </div>
+                    <div className="text-sm text-gray-500">{location.count} pengunjung</div>
                   </div>
                   <div className="w-20 bg-gray-200 rounded-full h-2">
                     <div
                       className="bg-gradient-to-r from-orange-500 to-amber-500 h-2 rounded-full"
                       style={{
-                        width: `${analytics.topLocations.length > 0 ? (location.count / analytics.topLocations[0].count) * 100 : 0}%`,
+                        width: `${(location.count / analytics.topLocations[0].count) * 100}%`
                       }}
                     ></div>
                   </div>
                 </div>
               ))}
-              {analytics.topLocations.length === 0 && (
-                <div className="text-center py-8 text-gray-500">
-                  Belum ada data pengunjung
-                </div>
-              )}
             </div>
           </div>
 
           {/* Daily Visits */}
           <div>
-            <h3 className="text-lg text-gray-900 mb-4">
-              📊 Kunjungan 7 Hari Terakhir
-            </h3>
+            <h3 className="text-lg text-gray-900 mb-4">📊 Kunjungan 7 Hari Terakhir</h3>
             <div className="space-y-3">
               {analytics.dailyVisits.map((day, index) => (
                 <div key={index} className="flex items-center space-x-3">
                   <div className="w-20 text-sm text-gray-600">
-                    {new Date(day.date).toLocaleDateString('id-ID', {
-                      weekday: 'short',
-                      day: 'numeric',
-                    })}
+                    {new Date(day.date).toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric' })}
                   </div>
                   <div className="flex-1 bg-gray-200 rounded-full h-8 relative overflow-hidden">
                     <div
                       className="bg-gradient-to-r from-blue-500 to-blue-400 h-full rounded-full flex items-center justify-end pr-3"
                       style={{
-                        width: `${Math.max((day.count / Math.max(...analytics.dailyVisits.map((d) => d.count), 1)) * 100, 10)}%`,
+                        width: `${Math.max((day.count / Math.max(...analytics.dailyVisits.map(d => d.count))) * 100, 10)}%`
                       }}
                     >
                       <span className="text-white text-sm">{day.count}</span>
@@ -366,11 +265,6 @@ export default function DashboardOverview() {
                   </div>
                 </div>
               ))}
-              {analytics.dailyVisits.length === 0 && (
-                <div className="text-center py-8 text-gray-500">
-                  Belum ada data kunjungan
-                </div>
-              )}
             </div>
           </div>
         </div>
@@ -384,12 +278,8 @@ export default function DashboardOverview() {
               <MapPin className="text-purple-600" size={24} />
             </div>
             <div>
-              <h2 className="text-2xl text-gray-900">
-                Digital Shelf Locator - Overview
-              </h2>
-              <p className="text-sm text-gray-600">
-                Ringkasan lokasi toko dan mitra
-              </p>
+              <h2 className="text-2xl text-gray-900">Digital Shelf Locator - Overview</h2>
+              <p className="text-sm text-gray-600">Ringkasan lokasi toko dan mitra</p>
             </div>
           </div>
           <a
@@ -402,20 +292,18 @@ export default function DashboardOverview() {
 
         <div className="grid md:grid-cols-4 gap-4 mb-6">
           <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-4 border border-purple-200">
-            <div className="text-2xl text-purple-600 mb-1">
-              {storeLocations.length}
-            </div>
+            <div className="text-2xl text-purple-600 mb-1">{storeLocations.length}</div>
             <div className="text-sm text-gray-700">Total Lokasi</div>
           </div>
           <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-4 border border-green-200">
             <div className="text-2xl text-green-600 mb-1">
-              {storeLocations.filter((l) => l.is_active).length}
+              {storeLocations.filter(l => l.is_active).length}
             </div>
             <div className="text-sm text-gray-700">Aktif</div>
           </div>
           <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl p-4 border border-blue-200">
             <div className="text-2xl text-blue-600 mb-1">
-              {storeLocations.filter((l) => l.store_type === 'reseller').length}
+              {storeLocations.filter(l => l.store_type === 'reseller').length}
             </div>
             <div className="text-sm text-gray-700">Reseller</div>
           </div>
@@ -428,15 +316,10 @@ export default function DashboardOverview() {
         </div>
 
         <div>
-          <h3 className="text-lg text-gray-900 mb-4">
-            📍 Daerah Toko & Reseller
-          </h3>
+          <h3 className="text-lg text-gray-900 mb-4">📍 Daerah Toko & Reseller</h3>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
             {Object.entries(locationsByCity).map(([city, count]) => (
-              <div
-                key={city}
-                className="bg-gray-50 rounded-lg p-3 border border-gray-200"
-              >
+              <div key={city} className="bg-gray-50 rounded-lg p-3 border border-gray-200">
                 <div className="flex items-center space-x-2">
                   <MapPin size={16} className="text-purple-600" />
                   <div className="flex-1">
@@ -446,11 +329,6 @@ export default function DashboardOverview() {
                 </div>
               </div>
             ))}
-            {Object.keys(locationsByCity).length === 0 && (
-              <div className="col-span-full text-center py-8 text-gray-500">
-                Belum ada lokasi terdaftar
-              </div>
-            )}
           </div>
         </div>
       </div>
@@ -463,9 +341,7 @@ export default function DashboardOverview() {
           </div>
           <div>
             <h2 className="text-2xl text-gray-900">Smart Caption Generator</h2>
-            <p className="text-sm text-gray-600">
-              Buat caption menarik untuk media sosial
-            </p>
+            <p className="text-sm text-gray-600">Buat caption menarik untuk media sosial</p>
           </div>
         </div>
 
@@ -473,47 +349,32 @@ export default function DashboardOverview() {
           {/* Form */}
           <div className="space-y-4">
             <div>
-              <label className="block text-sm text-gray-700 mb-2">
-                Nama Produk
-              </label>
+              <label className="block text-sm text-gray-700 mb-2">Nama Produk</label>
               <input
                 type="text"
                 value={captionForm.productName}
-                onChange={(e) =>
-                  setCaptionForm({
-                    ...captionForm,
-                    productName: e.target.value,
-                  })
-                }
+                onChange={(e) => setCaptionForm({ ...captionForm, productName: e.target.value })}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                 placeholder="Keripik Lumpia Mealjun"
               />
             </div>
 
             <div>
-              <label className="block text-sm text-gray-700 mb-2">
-                Varian Rasa
-              </label>
+              <label className="block text-sm text-gray-700 mb-2">Varian Rasa</label>
               <input
                 type="text"
                 value={captionForm.flavor}
-                onChange={(e) =>
-                  setCaptionForm({ ...captionForm, flavor: e.target.value })
-                }
+                onChange={(e) => setCaptionForm({ ...captionForm, flavor: e.target.value })}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                 placeholder="Original"
               />
             </div>
 
             <div>
-              <label className="block text-sm text-gray-700 mb-2">
-                Tone Caption
-              </label>
+              <label className="block text-sm text-gray-700 mb-2">Tone Caption</label>
               <select
                 value={captionForm.tone}
-                onChange={(e) =>
-                  setCaptionForm({ ...captionForm, tone: e.target.value })
-                }
+                onChange={(e) => setCaptionForm({ ...captionForm, tone: e.target.value })}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
               >
                 <option value="friendly">Ramah</option>
@@ -527,12 +388,7 @@ export default function DashboardOverview() {
                 type="checkbox"
                 id="includeEmoji"
                 checked={captionForm.includeEmoji}
-                onChange={(e) =>
-                  setCaptionForm({
-                    ...captionForm,
-                    includeEmoji: e.target.checked,
-                  })
-                }
+                onChange={(e) => setCaptionForm({ ...captionForm, includeEmoji: e.target.checked })}
                 className="w-4 h-4 text-purple-600 rounded focus:ring-purple-500"
               />
               <label htmlFor="includeEmoji" className="text-sm text-gray-700">
@@ -553,9 +409,7 @@ export default function DashboardOverview() {
           {/* Result */}
           <div>
             <div className="flex items-center justify-between mb-3">
-              <label className="block text-sm text-gray-700">
-                Caption yang Dihasilkan
-              </label>
+              <label className="block text-sm text-gray-700">Caption yang Dihasilkan</label>
               {generatedCaption && (
                 <button
                   onClick={copyCaption}
@@ -579,11 +433,9 @@ export default function DashboardOverview() {
                 </button>
               )}
             </div>
-            <div className="bg-gradient-to-br from-gray-50 to-purple-50 rounded-xl flex items-center justify-center p-4 border border-gray-200 min-h-[300px]">
+            <div className="bg-gradient-to-br from-gray-50 to-purple-50 rounded-xl p-4 border border-gray-200 min-h-[300px]">
               {generatedCaption ? (
-                <div className="text-gray-700 whitespace-pre-wrap">
-                  {generatedCaption}
-                </div>
+                <div className="text-gray-700 whitespace-pre-wrap">{generatedCaption}</div>
               ) : (
                 <div className="flex items-center justify-center h-full text-gray-400">
                   <div className="text-center">
@@ -595,8 +447,7 @@ export default function DashboardOverview() {
             </div>
             {generatedCaption && (
               <div className="mt-3 text-sm text-gray-500">
-                {generatedCaption.length} karakter •{' '}
-                {generatedCaption.split(' ').length} kata
+                {generatedCaption.length} karakter • {generatedCaption.split(' ').length} kata
               </div>
             )}
           </div>
@@ -631,5 +482,5 @@ export default function DashboardOverview() {
         </div>
       </div>
     </div>
-  )
+  );
 }

@@ -1,127 +1,113 @@
-import { useState, useEffect } from 'react';
-import { Heart, Award, Users, TrendingUp } from 'lucide-react';
+import { Target, Award, Heart } from 'lucide-react';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
-import { projectId, publicAnonKey } from '../../utils/supabase/info';
-
-interface Profile {
-  title: string;
-  description: string;
-  vision: string;
-  mission: string;
-}
 
 export default function AboutSection() {
-  const [profile, setProfile] = useState<Profile | null>(null);
-
-  useEffect(() => {
-    fetchProfile();
-  }, []);
-
-  const fetchProfile = async () => {
-    try {
-      const response = await fetch(
-        `https://${projectId}.supabase.co/functions/v1/make-server-513f45b4/profile`,
-        {
-          headers: {
-            'Authorization': `Bearer ${publicAnonKey}`
-          }
-        }
-      );
-      if (response.ok) {
-        const data = await response.json();
-        setProfile(data);
-      }
-    } catch (error) {
-      console.error('Error fetching profile:', error);
-    }
+  // Dummy about data
+  const aboutData = {
+    title: 'Tentang Mealjun',
+    description: 'Mealjun adalah brand UMKM yang menghadirkan keripik lumpia berkualitas tinggi dengan berbagai varian rasa. Kami berkomitmen untuk memberikan camilan sehat, higienis, dan lezat untuk keluarga Indonesia.\n\nDibuat dengan bahan-bahan pilihan dan tanpa pengawet, setiap produk Mealjun diproduksi fresh setiap hari untuk menjaga kualitas dan kerenyahan yang sempurna.',
+    vision: 'Menjadi brand keripik lumpia terpercaya dan terfavorit di Indonesia',
+    mission: 'Menghadirkan camilan sehat dan berkualitas tinggi dengan harga terjangkau untuk seluruh keluarga Indonesia',
+    image_url: 'https://images.unsplash.com/photo-1599490659213-e2b9527bd087?w=800'
   };
 
   const features = [
     {
-      icon: Heart,
-      title: 'Bahan Berkualitas',
-      description: 'Dipilih dengan teliti untuk cita rasa terbaik'
+      icon: Target,
+      title: 'Visi Kami',
+      description: aboutData.vision,
+      color: 'from-blue-500 to-cyan-500',
+      bgColor: 'bg-blue-50'
     },
     {
       icon: Award,
-      title: 'Standar Tinggi',
-      description: 'Sertifikasi BPOM dan Halal'
+      title: 'Misi Kami',
+      description: aboutData.mission,
+      color: 'from-orange-500 to-amber-500',
+      bgColor: 'bg-orange-50'
     },
     {
-      icon: Users,
-      title: 'UMKM Lokal',
-      description: 'Memberdayakan ekonomi lokal'
-    },
-    {
-      icon: TrendingUp,
-      title: 'Inovasi Rasa',
-      description: 'Terus berinovasi dengan varian baru'
+      icon: Heart,
+      title: 'Komitmen Kami',
+      description: 'Memberikan produk berkualitas dengan harga terjangkau dan pelayanan terbaik',
+      color: 'from-pink-500 to-rose-500',
+      bgColor: 'bg-pink-50'
     }
   ];
 
   return (
-    <section id="tentang" className="py-24 bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid md:grid-cols-2 gap-16 items-center">
-          {/* Left - Image */}
-          <div className="relative">
-            <div className="grid grid-cols-2 gap-4">
-              <ImageWithFallback
-                src="https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?w=400&h=300&fit=crop"
-                alt="Proses Produksi"
-                className="w-full h-64 object-cover rounded-2xl shadow-lg"
-              />
-              <ImageWithFallback
-                src="https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=400&h=300&fit=crop"
-                alt="Keripik Lumpia"
-                className="w-full h-64 object-cover rounded-2xl shadow-lg mt-8"
-              />
-            </div>
-            <div className="absolute -bottom-8 -right-8 bg-orange-600 text-white p-8 rounded-2xl shadow-xl">
-              <div className="text-4xl">5+</div>
-              <div className="text-sm mt-1">Tahun Pengalaman</div>
-            </div>
+    <section id="tentang" className="py-20 bg-white">
+      <div className="container mx-auto px-4">
+        <div className="text-center mb-16">
+          <div className="inline-block bg-orange-100 text-orange-600 px-4 py-2 rounded-full text-sm mb-4">
+            Tentang Kami
           </div>
+          <h2 className="text-4xl md:text-5xl text-gray-900 mb-4">
+            {aboutData.title}
+          </h2>
+        </div>
 
-          {/* Right - Content */}
-          <div className="space-y-8">
-            <div>
-              <span className="text-orange-600 text-sm uppercase tracking-wider">Tentang Kami</span>
-              <h2 className="text-4xl text-gray-900 mt-2">
-                {profile?.title || 'Keripik Lumpia Berkualitas dari Tangan Terampil'}
-              </h2>
-            </div>
-
-            <p className="text-lg text-gray-600 leading-relaxed">
-              {profile?.description || 'Mealjun adalah UMKM yang berdedikasi menghadirkan keripik lumpia berkualitas tinggi dengan berbagai pilihan rasa. Setiap produk dibuat dengan penuh perhatian menggunakan bahan-bahan pilihan dan resep tradisional yang telah disempurnakan.'}
+        <div className="grid lg:grid-cols-2 gap-12 items-center max-w-6xl mx-auto mb-16">
+          <div className="order-2 lg:order-1">
+            <p className="text-lg text-gray-700 leading-relaxed whitespace-pre-line mb-8">
+              {aboutData.description}
             </p>
 
-            {profile?.vision && (
-              <div className="bg-orange-50 p-6 rounded-xl border-l-4 border-orange-600">
-                <div className="text-orange-600 mb-2">Visi Kami</div>
-                <p className="text-gray-700">{profile.vision}</p>
-              </div>
-            )}
-
-            {profile?.mission && (
-              <div className="bg-amber-50 p-6 rounded-xl border-l-4 border-amber-600">
-                <div className="text-amber-600 mb-2">Misi Kami</div>
-                <p className="text-gray-700">{profile.mission}</p>
-              </div>
-            )}
-
-            <div className="grid grid-cols-2 gap-6 pt-4">
-              {features.map((feature, index) => (
-                <div key={index} className="space-y-2">
-                  <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                    <feature.icon className="text-orange-600" size={24} />
-                  </div>
-                  <h3 className="text-gray-900">{feature.title}</h3>
-                  <p className="text-sm text-gray-600">{feature.description}</p>
+            <div className="space-y-4">
+              <div className="flex items-start space-x-3">
+                <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 mt-1">
+                  <div className="w-3 h-3 rounded-full bg-green-500"></div>
                 </div>
-              ))}
+                <div>
+                  <div className="text-gray-900 mb-1">100% Bahan Berkualitas</div>
+                  <p className="text-sm text-gray-600">Dibuat dari bahan pilihan tanpa pengawet</p>
+                </div>
+              </div>
+              <div className="flex items-start space-x-3">
+                <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 mt-1">
+                  <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                </div>
+                <div>
+                  <div className="text-gray-900 mb-1">Proses Higienis</div>
+                  <p className="text-sm text-gray-600">Diproduksi dengan standar kebersihan tinggi</p>
+                </div>
+              </div>
+              <div className="flex items-start space-x-3">
+                <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 mt-1">
+                  <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                </div>
+                <div>
+                  <div className="text-gray-900 mb-1">Produksi Fresh</div>
+                  <p className="text-sm text-gray-600">Dibuat fresh setiap hari untuk kerenyahan maksimal</p>
+                </div>
+              </div>
             </div>
           </div>
+
+          <div className="order-1 lg:order-2">
+            <div className="relative rounded-3xl overflow-hidden shadow-2xl">
+              <ImageWithFallback
+                src={aboutData.image_url}
+                alt="Tentang Mealjun"
+                className="w-full h-full object-cover"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+          {features.map((feature, index) => (
+            <div
+              key={index}
+              className={`${feature.bgColor} rounded-3xl p-8 hover:shadow-xl transition-all duration-300 hover:-translate-y-2`}
+            >
+              <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${feature.color} flex items-center justify-center mb-6 shadow-lg`}>
+                <feature.icon className="text-white" size={32} />
+              </div>
+              <h3 className="text-2xl text-gray-900 mb-4">{feature.title}</h3>
+              <p className="text-gray-700 leading-relaxed">{feature.description}</p>
+            </div>
+          ))}
         </div>
       </div>
     </section>

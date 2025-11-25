@@ -1,13 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Plus, Edit, Trash2, ExternalLink, Save, X } from 'lucide-react';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
-import { projectId, publicAnonKey } from '../../utils/supabase/info';
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  `https://${projectId}.supabase.co`,
-  publicAnonKey
-);
 
 interface Product {
   id: string;
@@ -23,7 +16,58 @@ interface Product {
 }
 
 export default function ProductManagement() {
-  const [products, setProducts] = useState<Product[]>([]);
+  // Dummy products data
+  const [products, setProducts] = useState<Product[]>([
+    {
+      id: '1',
+      name: 'Keripik Lumpia Original',
+      flavor: 'Original',
+      description: 'Keripik lumpia renyah dengan rasa original yang klasik',
+      price: 'Rp 15.000',
+      image_url: 'https://images.unsplash.com/photo-1599490659213-e2b9527bd087?w=400',
+      shopee_link: 'https://shopee.co.id',
+      tiktok_link: 'https://tiktok.com',
+      whatsapp_link: 'https://wa.me/628123456789',
+      stock_status: 'available'
+    },
+    {
+      id: '2',
+      name: 'Keripik Lumpia Balado',
+      flavor: 'Balado',
+      description: 'Keripik lumpia dengan sensasi pedas balado yang menggigit',
+      price: 'Rp 18.000',
+      image_url: 'https://images.unsplash.com/photo-1621939514649-280e2ee25f60?w=400',
+      shopee_link: 'https://shopee.co.id',
+      tiktok_link: 'https://tiktok.com',
+      whatsapp_link: 'https://wa.me/628123456789',
+      stock_status: 'available'
+    },
+    {
+      id: '3',
+      name: 'Keripik Lumpia Keju',
+      flavor: 'Keju',
+      description: 'Perpaduan sempurna antara gurih keripik dan creamy keju',
+      price: 'Rp 20.000',
+      image_url: 'https://images.unsplash.com/photo-1613919113640-25732ec5e61f?w=400',
+      shopee_link: 'https://shopee.co.id',
+      tiktok_link: 'https://tiktok.com',
+      whatsapp_link: 'https://wa.me/628123456789',
+      stock_status: 'available'
+    },
+    {
+      id: '4',
+      name: 'Keripik Lumpia BBQ',
+      flavor: 'BBQ',
+      description: 'Rasa BBQ smokey yang bikin nagih',
+      price: 'Rp 18.000',
+      image_url: 'https://images.unsplash.com/photo-1600555379765-f82335a7b1b0?w=400',
+      shopee_link: 'https://shopee.co.id',
+      tiktok_link: 'https://tiktok.com',
+      whatsapp_link: 'https://wa.me/628123456789',
+      stock_status: 'limited'
+    }
+  ]);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [formData, setFormData] = useState({
@@ -37,89 +81,24 @@ export default function ProductManagement() {
     whatsapp_link: '',
     stock_status: 'available'
   });
-  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
-
-  const fetchProducts = async () => {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const response = await fetch(
-        `https://${projectId}.supabase.co/functions/v1/make-server-513f45b4/products`,
-        {
-          headers: {
-            'Authorization': `Bearer ${session?.access_token || publicAnonKey}`
-          }
-        }
-      );
-      if (response.ok) {
-        const data = await response.json();
-        setProducts(data);
-      }
-    } catch (error) {
-      console.error('Error fetching products:', error);
-    }
+  const openAddModal = () => {
+    setEditingProduct(null);
+    setFormData({
+      name: '',
+      flavor: '',
+      description: '',
+      price: '',
+      image_url: '',
+      shopee_link: '',
+      tiktok_link: '',
+      whatsapp_link: '',
+      stock_status: 'available'
+    });
+    setIsModalOpen(true);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const url = editingProduct
-        ? `https://${projectId}.supabase.co/functions/v1/make-server-513f45b4/products/${editingProduct.id}`
-        : `https://${projectId}.supabase.co/functions/v1/make-server-513f45b4/products`;
-
-      const response = await fetch(url, {
-        method: editingProduct ? 'PUT' : 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session?.access_token}`
-        },
-        body: JSON.stringify(formData)
-      });
-
-      if (response.ok) {
-        await fetchProducts();
-        handleCloseModal();
-      } else {
-        alert('Error saving product');
-      }
-    } catch (error) {
-      console.error('Error saving product:', error);
-      alert('Error saving product');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDelete = async (id: string) => {
-    if (!confirm('Yakin ingin menghapus produk ini?')) return;
-
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const response = await fetch(
-        `https://${projectId}.supabase.co/functions/v1/make-server-513f45b4/products/${id}`,
-        {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${session?.access_token}`
-          }
-        }
-      );
-
-      if (response.ok) {
-        await fetchProducts();
-      }
-    } catch (error) {
-      console.error('Error deleting product:', error);
-    }
-  };
-
-  const handleEdit = (product: Product) => {
+  const openEditModal = (product: Product) => {
     setEditingProduct(product);
     setFormData({
       name: product.name,
@@ -135,20 +114,35 @@ export default function ProductManagement() {
     setIsModalOpen(true);
   };
 
-  const handleCloseModal = () => {
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (editingProduct) {
+      // Update existing product
+      setProducts(products.map(p => 
+        p.id === editingProduct.id 
+          ? { ...editingProduct, ...formData }
+          : p
+      ));
+      alert('Produk berhasil diupdate! (UI Only)');
+    } else {
+      // Add new product
+      const newProduct: Product = {
+        id: Date.now().toString(),
+        ...formData
+      };
+      setProducts([...products, newProduct]);
+      alert('Produk berhasil ditambahkan! (UI Only)');
+    }
+    
     setIsModalOpen(false);
-    setEditingProduct(null);
-    setFormData({
-      name: '',
-      flavor: '',
-      description: '',
-      price: '',
-      image_url: '',
-      shopee_link: '',
-      tiktok_link: '',
-      whatsapp_link: '',
-      stock_status: 'available'
-    });
+  };
+
+  const handleDelete = (id: string) => {
+    if (confirm('Apakah Anda yakin ingin menghapus produk ini?')) {
+      setProducts(products.filter(p => p.id !== id));
+      alert('Produk berhasil dihapus! (UI Only)');
+    }
   };
 
   return (
@@ -156,11 +150,11 @@ export default function ProductManagement() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl text-gray-900">Manajemen Produk</h1>
-          <p className="text-gray-600 mt-2">Kelola produk keripik lumpia Anda</p>
+          <p className="text-gray-600 mt-2">Kelola produk keripik lumpia Mealjun</p>
         </div>
         <button
-          onClick={() => setIsModalOpen(true)}
-          className="flex items-center space-x-2 bg-orange-600 text-white px-6 py-3 rounded-xl hover:bg-orange-700 transition-colors"
+          onClick={openAddModal}
+          className="flex items-center space-x-2 bg-gradient-to-r from-orange-500 to-amber-500 text-white px-6 py-3 rounded-xl hover:from-orange-600 hover:to-amber-600 transition-colors shadow-lg"
         >
           <Plus size={20} />
           <span>Tambah Produk</span>
@@ -168,53 +162,73 @@ export default function ProductManagement() {
       </div>
 
       {/* Products Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {products.map((product) => (
-          <div key={product.id} className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
-            <div className="relative h-48">
+          <div key={product.id} className="bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-100">
+            <div className="aspect-video w-full bg-gray-100 relative overflow-hidden">
               <ImageWithFallback
                 src={product.image_url}
                 alt={product.name}
                 className="w-full h-full object-cover"
               />
-              <div className="absolute top-3 right-3 bg-white rounded-full px-3 py-1 text-sm">
-                {product.flavor}
+              <div className={`absolute top-3 right-3 px-3 py-1 rounded-full text-xs ${
+                product.stock_status === 'available' 
+                  ? 'bg-green-500 text-white'
+                  : product.stock_status === 'limited'
+                  ? 'bg-yellow-500 text-white'
+                  : 'bg-red-500 text-white'
+              }`}>
+                {product.stock_status === 'available' ? 'Tersedia' : 
+                 product.stock_status === 'limited' ? 'Terbatas' : 'Habis'}
               </div>
             </div>
-            
-            <div className="p-4 space-y-3">
-              <div>
-                <h3 className="text-lg text-gray-900">{product.name}</h3>
-                <p className="text-sm text-gray-600 line-clamp-2">{product.description}</p>
+
+            <div className="p-5">
+              <h3 className="text-xl text-gray-900 mb-2">{product.name}</h3>
+              <div className="inline-block bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-sm mb-3">
+                {product.flavor}
               </div>
-              
-              <div className="text-orange-600">{product.price}</div>
-              
-              <div className="flex items-center space-x-2 text-sm">
-                <span className={`px-2 py-1 rounded-full ${
-                  product.stock_status === 'available' ? 'bg-green-100 text-green-700' :
-                  product.stock_status === 'low' ? 'bg-yellow-100 text-yellow-700' :
-                  'bg-red-100 text-red-700'
-                }`}>
-                  {product.stock_status === 'available' ? 'Tersedia' :
-                   product.stock_status === 'low' ? 'Stok Terbatas' : 'Habis'}
-                </span>
+              <p className="text-gray-600 text-sm mb-4 line-clamp-2">{product.description}</p>
+              <div className="text-2xl text-orange-600 mb-4">{product.price}</div>
+
+              <div className="flex flex-wrap gap-2 mb-4">
+                {product.shopee_link && (
+                  <a
+                    href={product.shopee_link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center space-x-1 text-xs bg-orange-50 text-orange-600 px-3 py-1 rounded-lg hover:bg-orange-100"
+                  >
+                    <ExternalLink size={12} />
+                    <span>Shopee</span>
+                  </a>
+                )}
+                {product.tiktok_link && (
+                  <a
+                    href={product.tiktok_link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center space-x-1 text-xs bg-gray-100 text-gray-700 px-3 py-1 rounded-lg hover:bg-gray-200"
+                  >
+                    <ExternalLink size={12} />
+                    <span>TikTok</span>
+                  </a>
+                )}
               </div>
-              
-              <div className="flex items-center space-x-2 pt-2">
+
+              <div className="flex space-x-2">
                 <button
-                  onClick={() => handleEdit(product)}
-                  className="flex-1 flex items-center justify-center space-x-1 bg-blue-50 text-blue-600 py-2 rounded-lg hover:bg-blue-100 transition-colors"
+                  onClick={() => openEditModal(product)}
+                  className="flex-1 flex items-center justify-center space-x-2 bg-blue-50 text-blue-600 px-4 py-2 rounded-lg hover:bg-blue-100 transition-colors"
                 >
                   <Edit size={16} />
                   <span>Edit</span>
                 </button>
                 <button
                   onClick={() => handleDelete(product.id)}
-                  className="flex-1 flex items-center justify-center space-x-1 bg-red-50 text-red-600 py-2 rounded-lg hover:bg-red-100 transition-colors"
+                  className="flex items-center justify-center bg-red-50 text-red-600 px-4 py-2 rounded-lg hover:bg-red-100 transition-colors"
                 >
                   <Trash2 size={16} />
-                  <span>Hapus</span>
                 </button>
               </div>
             </div>
@@ -222,16 +236,31 @@ export default function ProductManagement() {
         ))}
       </div>
 
-      {/* Modal */}
+      {products.length === 0 && (
+        <div className="text-center py-12 bg-white rounded-2xl border border-gray-200">
+          <div className="text-gray-400 mb-2">Belum ada produk</div>
+          <button
+            onClick={openAddModal}
+            className="text-orange-600 hover:text-orange-700"
+          >
+            Tambah produk pertama Anda
+          </button>
+        </div>
+      )}
+
+      {/* Add/Edit Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-200 flex items-center justify-between sticky top-0 bg-white">
+            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
               <h2 className="text-2xl text-gray-900">
-                {editingProduct ? 'Edit Produk' : 'Tambah Produk Baru'}
+                {editingProduct ? 'Edit Produk' : 'Tambah Produk'}
               </h2>
-              <button onClick={handleCloseModal} className="text-gray-500 hover:text-gray-700">
-                <X size={24} />
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <X size={20} />
               </button>
             </div>
 
@@ -241,11 +270,11 @@ export default function ProductManagement() {
                   <label className="block text-sm text-gray-700 mb-2">Nama Produk *</label>
                   <input
                     type="text"
-                    required
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                     placeholder="Keripik Lumpia Original"
+                    required
                   />
                 </div>
 
@@ -253,11 +282,11 @@ export default function ProductManagement() {
                   <label className="block text-sm text-gray-700 mb-2">Varian Rasa *</label>
                   <input
                     type="text"
-                    required
                     value={formData.flavor}
                     onChange={(e) => setFormData({ ...formData, flavor: e.target.value })}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                     placeholder="Original"
+                    required
                   />
                 </div>
               </div>
@@ -265,12 +294,12 @@ export default function ProductManagement() {
               <div>
                 <label className="block text-sm text-gray-700 mb-2">Deskripsi *</label>
                 <textarea
-                  required
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  rows={3}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  rows={3}
                   placeholder="Deskripsi produk..."
+                  required
                 />
               </div>
 
@@ -279,11 +308,11 @@ export default function ProductManagement() {
                   <label className="block text-sm text-gray-700 mb-2">Harga *</label>
                   <input
                     type="text"
-                    required
                     value={formData.price}
                     onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                    placeholder="Rp 25.000"
+                    placeholder="Rp 15.000"
+                    required
                   />
                 </div>
 
@@ -293,10 +322,11 @@ export default function ProductManagement() {
                     value={formData.stock_status}
                     onChange={(e) => setFormData({ ...formData, stock_status: e.target.value })}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    required
                   >
                     <option value="available">Tersedia</option>
-                    <option value="low">Stok Terbatas</option>
-                    <option value="out">Habis</option>
+                    <option value="limited">Terbatas</option>
+                    <option value="out_of_stock">Habis</option>
                   </select>
                 </div>
               </div>
@@ -305,62 +335,67 @@ export default function ProductManagement() {
                 <label className="block text-sm text-gray-700 mb-2">URL Gambar *</label>
                 <input
                   type="url"
-                  required
                   value={formData.image_url}
                   onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  placeholder="https://..."
+                  placeholder="https://example.com/image.jpg"
+                  required
                 />
               </div>
 
-              <div>
-                <label className="block text-sm text-gray-700 mb-2">Link Shopee</label>
-                <input
-                  type="url"
-                  value={formData.shopee_link}
-                  onChange={(e) => setFormData({ ...formData, shopee_link: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  placeholder="https://shopee.co.id/..."
-                />
+              <div className="border-t border-gray-200 pt-4 mt-4">
+                <h3 className="text-lg text-gray-900 mb-4">Link Marketplace</h3>
+                
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm text-gray-700 mb-2">Shopee Link</label>
+                    <input
+                      type="url"
+                      value={formData.shopee_link}
+                      onChange={(e) => setFormData({ ...formData, shopee_link: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      placeholder="https://shopee.co.id/..."
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm text-gray-700 mb-2">TikTok Shop Link</label>
+                    <input
+                      type="url"
+                      value={formData.tiktok_link}
+                      onChange={(e) => setFormData({ ...formData, tiktok_link: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      placeholder="https://tiktok.com/..."
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm text-gray-700 mb-2">WhatsApp Link</label>
+                    <input
+                      type="url"
+                      value={formData.whatsapp_link}
+                      onChange={(e) => setFormData({ ...formData, whatsapp_link: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      placeholder="https://wa.me/628123456789"
+                    />
+                  </div>
+                </div>
               </div>
 
-              <div>
-                <label className="block text-sm text-gray-700 mb-2">Link TikTok Shop</label>
-                <input
-                  type="url"
-                  value={formData.tiktok_link}
-                  onChange={(e) => setFormData({ ...formData, tiktok_link: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  placeholder="https://vt.tiktok.com/..."
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm text-gray-700 mb-2">Link WhatsApp</label>
-                <input
-                  type="url"
-                  value={formData.whatsapp_link}
-                  onChange={(e) => setFormData({ ...formData, whatsapp_link: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  placeholder="https://wa.me/..."
-                />
-              </div>
-
-              <div className="flex items-center space-x-3 pt-4">
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="flex-1 flex items-center justify-center space-x-2 bg-orange-600 text-white py-3 rounded-xl hover:bg-orange-700 transition-colors disabled:opacity-50"
-                >
-                  <Save size={20} />
-                  <span>{loading ? 'Menyimpan...' : 'Simpan'}</span>
-                </button>
+              <div className="flex space-x-3 pt-4">
                 <button
                   type="button"
-                  onClick={handleCloseModal}
-                  className="px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors"
+                  onClick={() => setIsModalOpen(false)}
+                  className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors"
                 >
                   Batal
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 flex items-center justify-center space-x-2 bg-gradient-to-r from-orange-500 to-amber-500 text-white px-6 py-3 rounded-xl hover:from-orange-600 hover:to-amber-600 transition-colors"
+                >
+                  <Save size={20} />
+                  <span>{editingProduct ? 'Update' : 'Simpan'}</span>
                 </button>
               </div>
             </form>
